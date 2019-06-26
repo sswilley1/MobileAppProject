@@ -6,6 +6,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.media.MediaPlayer;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -21,20 +23,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView textViewPlayer1;
     private TextView textViewPlayer2;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //This is music
+        MediaPlayer player = MediaPlayer.create(this, R.raw.game);
+        player.setLooping(true);
+        player.start();
+
+        //Here  are the references to our textView
         textViewPlayer1 = findViewById(R.id.text_view_1);
         textViewPlayer2 = findViewById(R.id.text_view_2);
 
+        //Assign button array with references to our buttons with nested for loops, then assign the buttons with the button IDs
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                String buttonID = "button_" + i + j;
-                int redID = getResources().getIdentifier(buttonID, "id", getPackageName());
-                buttons[i][j] = findViewById(redID);
-                buttons[i][j].setOnClickListener(this);
+                String buttonID = "button_" + i + j; //append the rows and columns by using the first part of the ID
+                int redID = getResources().getIdentifier(buttonID, "id", getPackageName()); //Building resource ID
+                buttons[i][j] = findViewById(redID); //Get references to our buttons w/o having to do for every one
+                buttons[i][j].setOnClickListener(this);// Same for the setOnClickListener by setting the main activity by using "this"
             }
 
         }
@@ -53,75 +63,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-        if (player1Turn) {
+        if (player1Turn) { //if playerOne turn is true, it's an X, else it's an O and takes care of changing the text of the button
             ((Button) v).setText("X");
         } else {
             ((Button) v).setText("O");
 
         }
-        roundCount++;
+        roundCount++; //One more round is over and increments
 
-        if (checkForWin()) {
+        if (checkForWin()) { //This method is if no one has won and there is a draw and it switches turns
             if (player1Turn) {
-                player1Wins();
+                winner_P1();
             } else {
-                player2Wins();
+                winner_P2();
             }
-        } else if (roundCount == 9) {
+        } else if (roundCount == 9) { //if 9 rounds are over there's a draw
             draw();
         } else {
-            player1Turn = !player1Turn;
+            player1Turn = !player1Turn; //this switches turns
         }
     }
 
     private Boolean checkForWin() {
-        String[][] field = new String[3][3];
+        String[][] points = new String[3][3];
 
+        //Go through all of the buttons and save them in a string array
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                field[i][j] = buttons[i][j].getText().toString();
+                points[i][j] = buttons[i][j].getText().toString();
 
             }
         }
         // compares three fields next to each other (ROWS)
         for (int i = 0; i < 3; i++) {
-            if (field[i][0].equals(field[i][1]) && field[i][0].equals(field[i][2]) && !field[i][0].equals("")) {
+            if (points[i][0].equals(points[i][1]) && points[i][0].equals(points[i][2]) && !points[i][0].equals("")) {
                 return true;
             }
         }
         // compares three fields next to each other (COLUMNS)
         for (int i = 0; i < 3; i++) {
-            if (field[0][i].equals(field[i][1]) && field[0][i].equals(field[2][i]) && !field[0][i].equals("")) {
+            if (points[0][i].equals(points[1][i]) && points[0][i].equals(points[2][i]) && !points[0][i].equals("")) {
                 return true;
             }
         }
         // check diagonal left to right
-        if (field[0][0].equals(field[1][1]) && field[0][0].equals(field[2][2]) && !field[0][0].equals("")) {
+        if (points[0][0].equals(points[1][1]) && points[0][0].equals(points[2][2]) && !points[0][0].equals("")) {
             return true;
         }
         // check diagonal right to left
-        if (field[0][2].equals(field[1][1]) && field[0][2].equals(field[2][0]) && !field[0][2].equals("")) {
+        if (points[0][2].equals(points[1][1]) && points[0][2].equals(points[2][0]) && !points[0][2].equals("")) {
             return true;
         }
         return false;
     }
 
-    private void player1Wins() {
-        player1Points++;
-        Toast.makeText(this, "Player 1 Wins", Toast.LENGTH_SHORT).show();
+    private void winner_P1() {
+        player1Points++; //increment P1 points
+        Toast.makeText(this, "Player 1 Is The Winner", Toast.LENGTH_SHORT).show();
         updatePointsText();
         resetBoard();
     }
 
-    private void player2Wins() {
-        player2Points++;
-        Toast.makeText(this, "Player 2 Wins", Toast.LENGTH_SHORT).show();
+    private void winner_P2() {
+        player2Points++; //increments P2 points
+        Toast.makeText(this, "Player 2 Is The Winner", Toast.LENGTH_SHORT).show();
         updatePointsText();
         resetBoard();
     }
 
     private void draw() {
-        Toast.makeText(this, "Draw!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "This Is A Draw!", Toast.LENGTH_SHORT).show();
         resetBoard();
     }
 
@@ -130,14 +141,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         textViewPlayer2.setText("Player 2: " + player2Points);
     }
 
-    private void resetBoard() {
+    private void resetBoard() { // goes through the whole board and resets it to empty
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 buttons[i][j].setText("");
             }
         }
-        roundCount = 0;
-        player1Turn = true;
+        roundCount = 0; //sets round to zero
+        player1Turn = true; //sets it back to player 1's turn
     }
 
     private void resetGame() {
